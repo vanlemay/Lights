@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07090f">
+<title>Section Lights</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Barlow:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#07090f; --panel:#111522; --line:#232a3d; --fg:#eef1f8; --muted:#8c95ad;
+  --accent:#ffcc2e; --accent-ink:#191300; --ok:#3ddc84; --warn:#ff9f43;
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.45;
+  padding:calc(20px + env(safe-area-inset-top,0px)) 16px calc(40px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:30rem;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(3rem,15vw,4.6rem);line-height:.88;text-transform:uppercase;margin:0}
+h1 span{color:var(--accent)}
+.lede{color:var(--muted);margin:0;max-width:34ch}
+.tag{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.next{display:flex;align-items:baseline;gap:10px}
+.next b{font-family:var(--display);font-size:1.6rem;color:var(--accent);font-variant-numeric:tabular-nums}
+.next span{color:var(--muted);font-size:.9rem}
+.seat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:16px}
+.field{display:flex;flex-direction:column;gap:8px}
+.field-head{display:flex;justify-content:space-between;align-items:baseline}
+.field-head b{font-family:var(--display);font-size:1.6rem;font-variant-numeric:tabular-nums}
+.ends{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+.toggle{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer}
+.toggle input{width:22px;height:22px;accent-color:var(--accent);margin-top:2px;flex:none}
+.toggle b{display:block}
+.toggle small{color:var(--muted)}
+.go{font-family:var(--display);font-weight:900;font-size:1.9rem;letter-spacing:.04em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);border:0;border-radius:14px;padding:16px;cursor:pointer}
+button:focus-visible,summary:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--fg);outline-offset:3px}
+.note{font-size:.82rem;color:var(--muted);margin:0}
+details{border-top:1px solid var(--line);padding-top:16px}
+summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--muted)}
+details[open] summary::after{content:"–"}
+.host{display:flex;flex-direction:column;gap:16px;margin-top:16px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label.lab{display:flex;flex-direction:column;gap:6px;font-size:.85rem;color:var(--muted)}
+label.lab output{color:var(--fg);font-variant-numeric:tabular-nums}
+select,input[type=number]{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;min-width:0;width:100%}
+.preview{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;background:#000;border-radius:10px;padding:6px}
+.preview i{aspect-ratio:1/1.6;border-radius:2px;background:#111;position:relative}
+.preview i.f::after{content:"";position:absolute;left:50%;top:22%;width:42%;aspect-ratio:1;transform:translateX(-50%);border-radius:50%;background:#fff;box-shadow:0 0 6px 2px #fff}
+.status{display:flex;align-items:baseline;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.status b{font-family:var(--display);font-size:2.4rem;font-variant-numeric:tabular-nums;color:var(--accent);min-width:2.2ch}
+.status span{color:var(--muted);font-size:.9rem}
+#qr{background:#fff;border-radius:12px;padding:14px;align-self:center}
+#qr img,#qr canvas{display:block;width:240px;height:240px}
+.url{font-family:ui-monospace,Menlo,monospace;font-size:.8rem;word-break:break-all;color:var(--accent);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:0}
+.btn2{font:inherit;font-weight:600;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:10px;padding:10px;cursor:pointer}
+.tapbig{font-family:var(--display);font-size:1.4rem;font-weight:900;text-transform:uppercase}
+
+#stage{position:fixed;inset:0;background:#000;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:space-between;touch-action:manipulation}
+#big{font-family:var(--display);font-weight:900;color:#fff;font-size:min(48vw,22rem);line-height:1;margin-top:18vh;text-shadow:0 0 30px rgba(0,0,0,.6);font-variant-numeric:tabular-nums}
+#hint{color:#fff;background:rgba(0,0,0,.65);border-radius:12px;padding:12px 16px;margin:0 16px calc(24px + env(safe-area-inset-bottom,0px));text-align:center;font-size:.95rem;transition:opacity .6s;max-width:26rem}
+#hint.gone{opacity:0}
+#hint .ok{color:var(--ok);font-weight:600}
+#hint .warn{color:var(--warn);font-weight:600}
+video{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none}
+@media (prefers-reduced-motion: reduce){#hint{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="join">
+  <div class="tag" id="themeTag">Student section · All of the Lights</div>
+  <h1>All of<br><span>the lights</span></h1>
+  <p class="lede">Every phone becomes one light, timed to the song. Set where you're standing, tap the button, and hold your phone up with the back facing the field.</p>
+  <div class="next"><b id="nextIn">–</b><span id="nextText">until the next show starts</span></div>
+
+  <div class="seat">
+    <div class="field">
+      <div class="field-head"><span class="tag">Left to right</span><b id="colOut">5</b></div>
+      <input type="range" id="col" min="1" max="10" value="5" aria-label="Your spot from left to right">
+      <div class="ends"><span>Far left</span><span>Far right</span></div>
+    </div>
+    <div class="field">
+      <div class="field-head"><span class="tag">Front to back</span><b id="rowOut">3</b></div>
+      <input type="range" id="row" min="1" max="5" value="3" aria-label="Your row from front to back">
+      <div class="ends"><span>Front row</span><span>Back row</span></div>
+    </div>
+  </div>
+
+  <label class="toggle" for="useFlash">
+    <input type="checkbox" id="useFlash" checked>
+    <span><b>Use my flashlight</b><small>Your phone will ask to use the camera. That's only to control the flash. Nothing is recorded or sent anywhere.</small></span>
+  </label>
+
+  <button class="go" id="go">Light it up</button>
+  <p class="note">Turn brightness all the way up. Flashes stay under three per second. If flashing lights bother you, uncheck the flashlight. Double-tap the screen to leave.</p>
+
+  <details id="hostBox">
+    <summary>Running the show? Host tools</summary>
+    <div class="host">
+      <div class="status"><b id="cd">–</b><span id="cdText">seconds until the song starts. Hit play at zero.</span></div>
+      <div class="preview" id="preview" aria-label="Preview of the section; white dots are flashlights"></div>
+      <div class="row">
+        <label class="lab">Colors
+          <select id="theme">
+            <option value="usa">Red, white, blue</option>
+            <option value="gold">Blue and gold</option>
+            <option value="green">Green and gold</option>
+            <option value="maroon">Maroon and white</option>
+            <option value="neon">Neon party</option>
+            <option value="fire">Fire</option>
+          </select>
+        </label>
+        <label class="lab">Tempo (BPM)
+          <input type="number" id="bpm" min="130" max="150" step="0.1" value="143">
+        </label>
+      </div>
+      <label class="lab">Lights early / late: <output id="offOut">0 ms</output>
+        <input type="range" id="off" min="-500" max="500" step="10" value="0">
+      </label>
+      <button class="btn2 tapbig" id="tap">Tap along to the beat</button>
+      <p class="note" id="tapOut">Play the song and tap on every beat for 10+ taps to check the tempo.</p>
+      <div id="qr"></div>
+      <p class="url" id="url"></p>
+      <button class="btn2" id="copy">Copy link</button>
+      <p class="note">Tempo, timing and colors are baked into the link and QR. Re-screenshot the QR after any change.</p>
+    </div>
+  </details>
+</div>
+
+<div id="stage" hidden><div id="big"></div><div id="hint"></div></div>
+<video id="cam" playsinline muted></video>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const THEMES={
+  usa:["#e0102a","#ffffff","#1f3bff"],
+  gold:["#ffc72c","#0a2fd6","#ffffff"],
+  green:["#00b050","#ffd200","#ffffff"],
+  maroon:["#b0002a","#ffffff","#ff6a00"],
+  neon:["#ff2bd6","#00e5ff","#a6ff00"],
+  fire:["#ff3b00","#ffb000","#ffffff"]
+};
+const NAMES={usa:"Red, white, blue",gold:"Blue and gold",green:"Green and gold",maroon:"Maroon and white",neon:"Neon party",fire:"Fire"};
+
+// Show timing: every 2 minutes on the clock, a 60-second show runs, then a 60-second break with a countdown.
+const CYCLE=120000, SHOW=60000;
+let theme="usa", bpm=143, offset=0;
+
+// Link token: theme-bpm-offset, e.g. usa-143-0, gold-142.6-m120 (m = minus)
+(function readHash(){
+  const m=(location.hash||"").slice(1).toLowerCase().match(/^([a-z]+)-(\d{3}(?:\.\d)?)(?:-(m?)(\d{1,3}))?$/);
+  if(m&&THEMES[m[1]]){
+    theme=m[1];
+    bpm=Math.min(150,Math.max(130,+m[2]));
+    if(m[4]) offset=Math.min(500,+m[4])*(m[3]?-1:1);
+  }
+})();
+
+const $=id=>document.getElementById(id);
+const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+const mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+const scale=(c,k)=>[c[0]*k,c[1]*k,c[2]*k];
+const css=c=>`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
+const BLACK=[0,0,0], WHITE=[255,255,255];
+function rand(n,s){let x=Math.sin(n*127.1+s*311.7)*43758.5453;return x-Math.floor(x);}
+
+// Where we are: song time in ms (null during the break) and seconds until the next start.
+function clock(now){
+  const t=((now%CYCLE)+CYCLE)%CYCLE;
+  const songMs=t-offset;
+  return {t, inShow:t<SHOW, songMs, untilStart:Math.ceil((CYCLE-t)/1000)};
+}
+
+/* ---- Choreography for the first minute, in beats. 143 BPM ≈ 143 beats in 60 s.
+   Sections (4 beats = 1 bar):
+   0–15   LIGHTS ON: section switches on column by column, left to right, and stays on
+   16–47  PULSE: whole section hits on beats 1 and 3, colors trade each bar
+   48–79  SWEEP: light bounces left→right, then right→left, one bar each way
+   80–111 TRADE: left and right halves answer each other every beat
+   112–127 BUILD: light climbs front to back, then everyone hits every beat
+   128–140 ALL OF THE LIGHTS: every light on, colors marching
+   141+   blackout to end the minute                                                     */
+function phase(now){
+  const c=clock(now);
+  if(!c.inShow||c.songMs<0) return null;
+  const beat=c.songMs/(60000/bpm);
+  return {b:beat, f:beat%1, bar:Math.floor(beat/4)};
+}
+
+function colorAt(p,x,y,seed,pal){
+  const [A,B,C]=pal.map(hex);
+  if(!p) return BLACK;
+  const {b,f,bar}=p, pulse=Math.exp(-f*3.5);
+  if(b<16){ const lit=x<=(b/16)+0.05; return lit?mix(A,WHITE,0.15*pulse):scale(C,0.06); }
+  if(b<48){ const on=(Math.floor(b)%2===0); const col=bar%2?B:A; return on?scale(col,0.35+0.65*pulse):scale(col,0.25); }
+  if(b<80){ const w=((b-48)%8)/4; const pos=w<1?w:2-w; return Math.abs(x-pos)<0.14?B:scale(A,0.15); }
+  if(b<112){ const even=Math.floor(b)%2===0; return (even===(x<0.5))?scale(even?A:C,0.35+0.65*pulse):scale(B,0.1); }
+  if(b<128){
+    if(b<120){ const w=((b-112)%4)/4; return Math.abs(y-w)<0.2?A:scale(C,0.12); }
+    return mix(scale(A,0.4+0.6*pulse),WHITE,((b-120)/8)*pulse);
+  }
+  if(b<141){ return [A,B,C][Math.floor(x*3+y+b/2)%3]; }
+  return BLACK;
+}
+
+// Every "on" lasts at least ~250 ms so the flash hardware keeps up.
+function torchAt(p,x,y,seed){
+  if(!p) return false;
+  const {b,f}=p;
+  if(b<16) return x<=(b/16)+0.05;                                   // switch on left to right, stay on
+  if(b<48) return (Math.floor(b)%2===0)&&f<0.6;                     // hits on 1 and 3
+  if(b<80){ const w=((b-48)%8)/4; const pos=w<1?w:2-w; return Math.abs(x-pos)<0.15; } // bounce
+  if(b<112){ const even=Math.floor(b)%2===0; return (even===(x<0.5))&&f<0.6; }       // sides trade
+  if(b<128){
+    if(b<120){ const w=((b-112)%4)/4; return Math.abs(y-w)<0.22; }  // climb front to back
+    return f<0.55;                                                  // everyone on every beat
+  }
+  if(b<141) return true;                                            // all of the lights
+  return false;
+}
+
+/* ---------- Flashlight control ---------- */
+const Torch={
+  track:null, stream:null, ok:false, want:false, applied:null, busy:false, lag:120,
+  async start(){
+    if(!navigator.mediaDevices?.getUserMedia) return "nosupport";
+    try{ this.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false}); }
+    catch(e){ return e&&e.name==="NotAllowedError"?"denied":"nosupport"; }
+    let track=this.stream.getVideoTracks()[0];
+    if(!this.hasTorch(track)){
+      try{
+        const devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput");
+        for(const d of devs){
+          if(d.deviceId===track.getSettings().deviceId) continue;
+          let s; try{ s=await navigator.mediaDevices.getUserMedia({video:{deviceId:{exact:d.deviceId}}}); }catch(e){ continue; }
+          const t=s.getVideoTracks()[0];
+          if(this.hasTorch(t)){ this.stream.getTracks().forEach(x=>x.stop()); this.stream=s; track=t; break; }
+          s.getTracks().forEach(x=>x.stop());
+        }
+      }catch(e){}
+    }
+    const v=$("cam"); v.srcObject=this.stream; try{ await v.play(); }catch(e){}
+    this.track=track;
+    try{ await track.applyConstraints({advanced:[{torch:true}]}); await track.applyConstraints({advanced:[{torch:false}]}); this.ok=true; }
+    catch(e){ this.ok=false; }
+    if(!this.ok){ this.stop(); return "notorch"; }
+    this.applied=false; return "ok";
+  },
+  hasTorch(t){ try{ return !!(t.getCapabilities&&t.getCapabilities().torch); }catch(e){ return false; } },
+  set(on){
+    this.want=on;
+    if(!this.ok||this.busy||this.applied===on) return;
+    this.busy=true; const target=on;
+    this.track.applyConstraints({advanced:[{torch:target}]})
+      .then(()=>{ this.applied=target; }).catch(()=>{})
+      .finally(()=>{ this.busy=false; if(this.want!==this.applied) this.set(this.want); });
+  },
+  stop(){
+    try{ this.track&&this.track.applyConstraints({advanced:[{torch:false}]}); }catch(e){}
+    try{ this.stream&&this.stream.getTracks().forEach(t=>t.stop()); }catch(e){}
+    this.track=null; this.stream=null; this.ok=false; this.applied=null;
+  }
+};
+
+/* ---------- Fan view ---------- */
+const col=$("col"), row=$("row"), useFlash=$("useFlash");
+const syncOut=()=>{$("colOut").textContent=col.value;$("rowOut").textContent=row.value;};
+col.oninput=row.oninput=syncOut;
+try{const s=JSON.parse(localStorage.getItem("seat")||"null");if(s){col.value=s.c;row.value=s.r;useFlash.checked=s.f!==false;}}catch(e){}
+syncOut();
+const tagText=()=>`Student section · All of the Lights · ${NAMES[theme]}`;
+$("themeTag").textContent=tagText();
+
+let running=false, wake=null; const seed=Math.random()*1000;
+const stage=$("stage"), hint=$("hint"), big=$("big");
+function showHint(html,ms){ hint.innerHTML=html; hint.classList.remove("gone"); clearTimeout(showHint.t); showHint.t=setTimeout(()=>hint.classList.add("gone"),ms); }
+
+async function start(){
+  try{localStorage.setItem("seat",JSON.stringify({c:col.value,r:row.value,f:useFlash.checked}));}catch(e){}
+  stage.hidden=false; running=true; big.textContent="";
+  showHint("Getting ready…",60000);
+  try{ await document.documentElement.requestFullscreen?.(); }catch(e){}
+  try{ wake=await navigator.wakeLock?.request("screen"); }catch(e){}
+  let msg="Hold your phone up, back facing the field.<br>Double-tap to leave.";
+  if(useFlash.checked){
+    const r=await Torch.start();
+    if(r==="ok") msg=`<span class="ok">Flashlight ready.</span> Hold your phone up, back facing the field.<br>Double-tap to leave.`;
+    else if(r==="denied") msg=`<span class="warn">Camera was blocked, so your flash is off.</span> Your screen is still in the show. Hold it up facing the field.`;
+    else msg=`<span class="warn">This phone won't let a website use the flash.</span> Your screen is still in the show. Turn it around to face the field.`;
+  }
+  if(!running){ Torch.stop(); return; }
+  showHint(msg,6000);
+  const x=(col.value-1)/9, y=(row.value-1)/4, pal=THEMES[theme];
+  (function loop(){
+    if(!running) return;
+    const now=Date.now(), c=clock(now);
+    const p=phase(now);
+    if(c.inShow){
+      big.textContent="";
+      stage.style.background=css(colorAt(p,x,y,seed,pal));
+    }else{
+      // Break: dim glow, big countdown for the last 10 seconds
+      const glow=hex(pal[0]);
+      stage.style.background=css(scale(glow,0.08+0.04*Math.sin(now/400)));
+      big.textContent=c.untilStart<=10?c.untilStart:"";
+    }
+    if(Torch.ok) Torch.set(torchAt(phase(now+Torch.lag),x,y,seed)); // fire early so the light lands on the beat
+    requestAnimationFrame(loop);
+  })();
+}
+function stop(){
+  running=false; stage.hidden=true; Torch.stop();
+  try{ document.fullscreenElement&&document.exitFullscreen(); }catch(e){}
+  try{ wake&&wake.release(); }catch(e){} wake=null;
+}
+$("go").onclick=start;
+let lastTap=0;
+stage.addEventListener("click",()=>{const t=Date.now();if(t-lastTap<400)stop();lastTap=t;});
+document.addEventListener("visibilitychange",async()=>{
+  if(!running) return;
+  if(document.visibilityState==="visible"){ try{ wake=await navigator.wakeLock?.request("screen"); }catch(e){} }
+  else stop();
+});
+
+/* ---------- Host tools ---------- */
+const themeSel=$("theme"), bpmIn=$("bpm"), offIn=$("off");
+themeSel.value=theme; bpmIn.value=bpm; offIn.value=offset;
+const prev=$("preview"), cells=[];
+for(let r=0;r<5;r++)for(let c=0;c<10;c++){const i=document.createElement("i");prev.appendChild(i);cells.push({i,x:c/9,y:r/4,s:Math.random()*1000});}
+const token=()=>`${theme}-${(Math.round(bpm*10)/10).toString()}-${offset<0?"m":""}${Math.abs(offset)}`;
+const shareUrl=()=>location.origin+location.pathname+"#"+token();
+function makeQR(){
+  const url=shareUrl(); $("url").textContent=url;
+  const box=$("qr"); box.innerHTML="";
+  try{ new QRCode(box,{text:url,width:480,height:480,correctLevel:QRCode.CorrectLevel.M}); }
+  catch(e){ box.textContent="QR maker didn't load. Use any free QR site with the link below."; box.style.color="#000"; }
+}
+function applyHost(){
+  theme=themeSel.value;
+  bpm=Math.min(150,Math.max(130,parseFloat(bpmIn.value)||143));
+  offset=parseInt(offIn.value)||0;
+  $("offOut").textContent=offset===0?"0 ms":(offset>0?`${offset} ms later`:`${-offset} ms earlier`);
+  history.replaceState(null,"","#"+token());
+  $("themeTag").textContent=tagText();
+  makeQR();
+}
+themeSel.onchange=applyHost; bpmIn.onchange=applyHost; offIn.oninput=()=>{ $("offOut").textContent=(offIn.value|0)+" ms"; }; offIn.onchange=applyHost;
+$("offOut").textContent=offset===0?"0 ms":(offset>0?`${offset} ms later`:`${-offset} ms earlier`);
+
+// Tap tempo
+let taps=[];
+$("tap").onclick=()=>{
+  const t=performance.now();
+  if(taps.length&&t-taps[taps.length-1]>2000) taps=[];
+  taps.push(t); if(taps.length>32) taps.shift();
+  if(taps.length<4){ $("tapOut").textContent=`Keep tapping… (${taps.length})`; return; }
+  const avg=(taps[taps.length-1]-taps[0])/(taps.length-1);
+  let measured=60000/avg; if(measured<100) measured*=2; // half-time tapping
+  $("tapOut").textContent=`You're tapping ${measured.toFixed(1)} BPM over ${taps.length} taps. Set at ${bpm}.`;
+};
+
+$("copy").onclick=async()=>{
+  const b=$("copy");
+  try{ await navigator.clipboard.writeText(shareUrl()); b.textContent="Copied"; }
+  catch(e){ const r=document.createRange(); r.selectNodeContents($("url")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent="Selected. Copy it from the menu."; }
+  setTimeout(()=>b.textContent="Copy link",2000);
+};
+makeQR();
+
+(function hostLoop(){
+  const now=Date.now(), c=clock(now);
+  // Front-page countdown
+  if(c.inShow){ $("nextIn").textContent="LIVE"; $("nextText").textContent="show is running now. Tap Light it up to join."; }
+  else { const s=c.untilStart; $("nextIn").textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; $("nextText").textContent="until the next show starts"; }
+  if(!running){
+    const pal=THEMES[themeSel.value], p=phase(now);
+    for(const cl of cells){
+      cl.i.style.background=css(c.inShow?colorAt(p,cl.x,cl.y,cl.s,pal):scale(hex(pal[0]),0.08));
+      cl.i.classList.toggle("f",torchAt(p,cl.x,cl.y,cl.s));
+    }
+    if(c.inShow){ $("cd").textContent=Math.floor(c.t/1000)+"s"; $("cdText").textContent="into the song. Next start after the break."; }
+    else { $("cd").textContent=c.untilStart; $("cdText").textContent="seconds until the song starts. Hit play at zero."; }
+  }
+  requestAnimationFrame(hostLoop);
+})();
+</script>
+</body>
+</html>
