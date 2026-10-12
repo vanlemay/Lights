@@ -16,6 +16,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.45;
   padding:calc(20px + env(safe-area-inset-top,0px)) 16px calc(40px + env(safe-area-inset-bottom,0px))}
@@ -76,7 +77,7 @@ video{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none}
 <div class="wrap" id="join">
   <div class="tag" id="themeTag">Student section · All of the Lights</div>
   <h1>All of<br><span>the lights</span></h1>
-  <p class="lede">Every phone becomes one light, timed to the song. Set where you're standing, tap the button, and hold your phone up with the back facing the field.</p>
+  <p class="lede">Every phone becomes one light, timed to the song. Set where you're standing and tap Light it up. Then get hype and be ready: hold your phone up high the second a student section leader tells you to.</p>
   <div class="next"><b id="nextIn">–</b><span id="nextText">until the next show starts</span></div>
 
   <div class="seat">
@@ -98,7 +99,7 @@ video{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none}
   </label>
 
   <button class="go" id="go">Light it up</button>
-  <p class="note">Turn brightness all the way up. Flashes stay under three per second. If flashing lights bother you, uncheck the flashlight. Double-tap the screen to leave.</p>
+  <p class="note">Turn brightness all the way up. If your flashlight doesn't work, flip your phone so the screen faces the basketball court. Flashes stay under three per second. If flashing lights bother you, uncheck the flashlight. Double-tap the screen to leave.</p>
 
   <details id="hostBox">
     <summary>Running the show? Host tools</summary>
@@ -287,15 +288,14 @@ async function start(){
   showHint("Getting ready…",60000);
   try{ await document.documentElement.requestFullscreen?.(); }catch(e){}
   try{ wake=await navigator.wakeLock?.request("screen"); }catch(e){}
-  let msg="Hold your phone up, back facing the field.<br>Double-tap to leave.";
+  let msg="You're in! Be hype and be ready.<br>Hold your phone up, <b>screen facing the court</b>, when a student section leader tells you to.";
   if(useFlash.checked){
     const r=await Torch.start();
-    if(r==="ok") msg=`<span class="ok">Flashlight ready.</span> Hold your phone up, back facing the field.<br>Double-tap to leave.`;
-    else if(r==="denied") msg=`<span class="warn">Camera was blocked, so your flash is off.</span> Your screen is still in the show. Hold it up facing the field.`;
-    else msg=`<span class="warn">This phone won't let a website use the flash.</span> Your screen is still in the show. Turn it around to face the field.`;
+    if(r==="ok") msg=`<span class="ok">Flashlight ready!</span> Be hype and be ready.<br>Hold your phone up, <b>back facing the court</b>, when a student section leader tells you to.`;
+    else msg=`<span class="warn">Flashlight didn't work on this phone.</span> No problem: you're still in the show.<br>Hold your phone up with the <b>screen facing the basketball court</b> when a student section leader tells you to.`;
   }
   if(!running){ Torch.stop(); return; }
-  showHint(msg,6000);
+  showHint(msg,Torch.ok?8000:12000);
   const x=(col.value-1)/9, y=(row.value-1)/4, pal=THEMES[theme];
   (function loop(){
     if(!running) return;
