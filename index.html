@@ -104,7 +104,7 @@ video{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none}
   <details id="hostBox">
     <summary>Running the show? Host tools</summary>
     <div class="host">
-      <div class="status"><b id="cd">–</b><span id="cdText">seconds until the song starts. Hit play at zero.</span></div>
+      <div class="status"><b id="cd">–</b><span id="cdText">seconds until the show loops back to the start. Hit play on the song at zero.</span></div>
       <div class="preview" id="preview" aria-label="Preview of the section; white dots are flashlights"></div>
       <div class="row">
         <label class="lab">Colors
@@ -149,8 +149,8 @@ const THEMES={
 };
 const NAMES={usa:"Red, white, blue",gold:"Blue and gold",green:"Green and gold",maroon:"Maroon and white",neon:"Neon party",fire:"Fire"};
 
-// Show timing: every 2 minutes on the clock, a 60-second show runs, then a 60-second break with a countdown.
-const CYCLE=120000, SHOW=60000;
+// Show timing: the 60-second show loops nonstop, restarting every minute on the clock. No break.
+const CYCLE=60000, SHOW=60000;
 let theme="usa", bpm=143, offset=0;
 
 // Link token: theme-bpm-offset, e.g. usa-143-0, gold-142.6-m120 (m = minus)
@@ -174,8 +174,8 @@ function rand(n,s){let x=Math.sin(n*127.1+s*311.7)*43758.5453;return x-Math.floo
 // Where we are: song time in ms (null during the break) and seconds until the next start.
 function clock(now){
   const t=((now%CYCLE)+CYCLE)%CYCLE;
-  const songMs=t-offset;
-  return {t, inShow:t<SHOW, songMs, untilStart:Math.ceil((CYCLE-t)/1000)};
+  const songMs=(((t-offset)%CYCLE)+CYCLE)%CYCLE;
+  return {t, inShow:true, songMs, untilStart:Math.ceil((CYCLE-songMs)/1000)};
 }
 
 /* ---- Choreography for the first minute, in beats. 143 BPM ≈ 143 beats in 60 s.
@@ -376,16 +376,14 @@ makeQR();
 (function hostLoop(){
   const now=Date.now(), c=clock(now);
   // Front-page countdown
-  if(c.inShow){ $("nextIn").textContent="LIVE"; $("nextText").textContent="show is running now. Tap Light it up to join."; }
-  else { const s=c.untilStart; $("nextIn").textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; $("nextText").textContent="until the next show starts"; }
+  $("nextIn").textContent="LIVE"; $("nextText").textContent="the show runs nonstop. Tap Light it up to join anytime.";
   if(!running){
     const pal=THEMES[themeSel.value], p=phase(now);
     for(const cl of cells){
       cl.i.style.background=css(c.inShow?colorAt(p,cl.x,cl.y,cl.s,pal):scale(hex(pal[0]),0.08));
       cl.i.classList.toggle("f",torchAt(p,cl.x,cl.y,cl.s));
     }
-    if(c.inShow){ $("cd").textContent=Math.floor(c.t/1000)+"s"; $("cdText").textContent="into the song. Next start after the break."; }
-    else { $("cd").textContent=c.untilStart; $("cdText").textContent="seconds until the song starts. Hit play at zero."; }
+    $("cd").textContent=c.untilStart; $("cdText").textContent="seconds until the show loops back to the start. Hit play on the song at zero.";
   }
   requestAnimationFrame(hostLoop);
 })();
